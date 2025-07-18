@@ -3,7 +3,7 @@ import time
 from sortedcontainers import SortedList
 
 class SudokuSolver:
-    def __init__(self, n):
+    def __init__(self, n: int) -> None:
         self.n = n
         self.sq = int(math.sqrt(n))
         self.bit_to_int = {}
@@ -30,7 +30,7 @@ class SudokuSolver:
                         if row != i and col != j:
                             self.peers[(i, j)].append((row, col))
 
-    def get_matrix(self, puzzle):
+    def get_matrix(self, puzzle: str) -> list[list[int]]:
         if "0" in puzzle:
             m = max(ord(ch) for ch in puzzle)
             puzzle = [chr(m+1) if ch == "0" else ch for ch in puzzle]
@@ -48,7 +48,7 @@ class SudokuSolver:
                     mat[i].append(int(puzzle[index]))
         return mat
 
-    def get_ints_squares(self, mat):
+    def get_ints_squares(self, mat: list[list[int]]) -> list[int]:
         squares = [0] * self.n
         for i in range(self.n):
             for j in range(self.n):
@@ -57,7 +57,7 @@ class SudokuSolver:
                     squares[square_idx] |= 1 << mat[i][j]
         return squares
 
-    def get_ints_rows_cols(self, mat, invert):
+    def get_ints_rows_cols(self, mat: list[list[int]], invert: bool) -> list[int]:
         rc = [0] * self.n
         for i in range(self.n):
             for j in range(self.n):
@@ -68,10 +68,10 @@ class SudokuSolver:
                         rc[i] |= 1 << mat[i][j]
         return rc
 
-    def solve(self, puzzle):
+    def solve(self, puzzle: str) -> list[list[int]]:
         puzzle_matrix = self.get_matrix(puzzle)
-        rows = self.get_ints_rows_cols(puzzle_matrix, 0)
-        cols = self.get_ints_rows_cols(puzzle_matrix, 1)
+        rows = self.get_ints_rows_cols(puzzle_matrix, False)
+        cols = self.get_ints_rows_cols(puzzle_matrix, True)
         squares = self.get_ints_squares(puzzle_matrix)
         
         def get_square_idx(i, j):
@@ -93,8 +93,8 @@ class SudokuSolver:
                     remaining_arr[i][j] = count
                     sorted_list.add((count, i, j))
                     remaining_cells.add((i, j))
-                    
-        def rec():
+
+        def recursive_solver(remaining_cells: set) -> list[list[int]]:
             if not remaining_cells:
                 return puzzle_matrix
                 
@@ -124,7 +124,7 @@ class SudokuSolver:
                         sorted_list.add((new_count, x, y))
                         peers_to_reset.append((x, y, old_count))
                 
-                if rec():
+                if recursive_solver(remaining_cells):
                     return puzzle_matrix
                 
                 puzzle_matrix[i][j] = 0
@@ -139,15 +139,15 @@ class SudokuSolver:
             
             remaining_cells.add((i, j))
             sorted_list.add((remaining_arr[i][j], i, j))
-            
-        return rec()
+        
+        return recursive_solver(remaining_cells)
     
 class SudokuChecker:
-    def __init__(self, n):
+    def __init__(self, n: int) -> None:
         self.n = n
         self.sq = int(math.sqrt(n))
 
-    def check(self, board):
+    def check(self, board: list[list[int]]) -> bool:
         digits = set(range(1, self.n + 1))
         for i in range(self.n):
             if set(board[i]) != digits:
