@@ -120,7 +120,7 @@ class SudokuSolver:
             while mask:
                 lsb = mask & -mask
                 mask -= lsb
-                chosen_value_for_current_cell = lsb.bit_length() - 1
+                chosen_value_for_current_cell = self.bit_to_int[lsb]
 
                 puzzle_matrix[i][j] = chosen_value_for_current_cell
 
